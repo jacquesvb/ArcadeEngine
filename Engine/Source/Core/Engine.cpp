@@ -14,6 +14,10 @@ Engine::Engine() :
         }
 
         LOG_INFO("Window created");
+
+        LOG_INFO("Random int: {}", context_.random.Int(1, 10));
+        LOG_INFO("Random float: {}", context_.random.Float(0.f, 1.f));
+        LOG_INFO("Random bool: {}", context_.random.Bool());
     }
 
     bool Engine::IsRunning() const
@@ -31,7 +35,7 @@ Engine::Engine() :
 
     void Engine::Update()
     {
-
+        context_.time.Update();
     }
 
     void Engine::Render()
@@ -44,7 +48,7 @@ Engine::Engine() :
     void Engine::EventWindowClose()
     {
         window_.close();
-        LOG_INFO("Window closed");
+        LOG_INFO("Window closed after {:.2f} seconds", context_.time.GetElapsedTime());
     }
 
     void Engine::EventWindowResized(sf::Vector2u size)
