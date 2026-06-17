@@ -13,11 +13,9 @@ Engine::Engine() :
             sf::err().rdbuf(nullptr);
         }
 
-        LOG_INFO("Window created");
+        context_.audio.SetGlobalVolume(gConfig.globalVolume);
 
-        LOG_INFO("Random int: {}", context_.random.Int(1, 10));
-        LOG_INFO("Random float: {}", context_.random.Float(0.f, 1.f));
-        LOG_INFO("Random bool: {}", context_.random.Bool());
+        LOG_INFO("Window created");
     }
 
     bool Engine::IsRunning() const
