@@ -3,74 +3,83 @@
 #include "Utils/Log.h"
 
 Engine::Engine() :
-    window_(sf::VideoMode(sf::Vector2u(gConfig.windowSize)), gConfig.windowTitle)
+    window_(sf::VideoMode(sf::Vector2u(gConfig.windowSize)), gConfig.windowTitle),
+    context_(window_)
+{
+    window_.setIcon(sf::Image("Content/Textures/Icon.png"));
+    window_.setMinimumSize(window_.getSize() / 2u);
+    window_.setKeyRepeatEnabled(false);
+
+    if (gConfig.disableSfmlLogs)
     {
-        window_.setIcon(sf::Image("Content/Textures/Icon.png"));
-        window_.setMinimumSize(window_.getSize() / 2u);
-        window_.setKeyRepeatEnabled(false);
-
-        if (gConfig.disableSfmlLogs)
-        {
-            sf::err().rdbuf(nullptr);
-        }
-
-        context_.audio.SetGlobalVolume(gConfig.globalVolume);
-
-        LOG_INFO("Window created");
+        sf::err().rdbuf(nullptr);
     }
 
-    bool Engine::IsRunning() const
-    {
-        return window_.isOpen();
-    }
+    context_.audio.SetGlobalVolume(gConfig.globalVolume);
 
-    void Engine::ProcessEvents()
-    {
-        while (const auto event = window_.pollEvent())
-        {
-            event->visit(EngineVisitor(*this));
-        }
-    }
+    LOG_INFO("Window created");
+}
 
-    void Engine::Update()
-    {
-        context_.time.Update();
-    }
+bool Engine::IsRunning() const
+{
+    return window_.isOpen();
+}
 
-    void Engine::Render()
+void Engine::ProcessEvents()
+{
+    while (const auto event = window_.pollEvent())
     {
-        window_.clear();
-
-        window_.display();
+        event->visit(EngineVisitor(*this));
     }
+}
 
-    void Engine::EventWindowClose()
-    {
-        window_.close();
-        LOG_INFO("Window closed after {:.2f} seconds", context_.time.GetElapsedTime());
-    }
+void Engine::Update()
+{
+    context_.time.Update();
+}
 
-    void Engine::EventWindowResized(sf::Vector2u size)
-    {
-        LOG_INFO("Window resized to: {}x{}", size.x, size.y);
-    }
+void Engine::Render()
+{
+    window_.clear();
 
-    void Engine::EventWindowFocusLost()
-    {
-        LOG_INFO("Window focus lost");
-    }
+    context_.renderer.BeginDrawing();
+    window_.draw(sf::Sprite(context_.renderer.FinishDrawing()));
 
-    void Engine::EventWindowFocusGained()
-    {
-        LOG_INFO("Window focus gained");
-    }
+    window_.display();
+}
 
-    void Engine::EventGamepadConnected(int id)
-    {
-        LOG_INFO("Gamepad {} connected", id);
-    }
+void Engine::EventWindowClose()
+{
+    window_.close();
+    LOG_INFO("Window closed after {:.2f} seconds", context_.time.GetElapsedTime());
+}
 
-    void Engine::EventGamepadDisconnected(int id)
-    {
-        LOG_INFO("Gamepad {} disconnected", id);
-    }
+void Engine::EventWindowResized(sf::Vector2u size)
+{
+    LOG_INFO("Window resized to: {}x{}", size.x, size.y);
+}
+
+void Engine::EventWindowFocusLost()
+{
+    LOG_INFO("Window focus lost");
+}
+
+void Engine::EventWindowFocusGained()
+{
+    LOG_INFO("Window focus gained");
+}
+
+void Engine::EventWindowScreenshot() const
+{
+    context_.screenshot.Take();
+}
+
+void Engine::EventGamepadConnected(int id)
+{
+    LOG_INFO("Gamepad {} connected", id);
+}
+
+void Engine::EventGamepadDisconnected(int id)
+{
+    LOG_INFO("Gamepad {} disconnected", id);
+}
