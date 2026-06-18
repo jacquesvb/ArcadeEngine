@@ -28,6 +28,11 @@ bool Engine::IsRunning() const
 
 void Engine::ProcessEvents()
 {
+    if (const auto nextScene = context_.scenes.FetchNextScene())
+    {
+        EventSceneChange(*nextScene);
+    }
+
     while (const auto event = window_.pollEvent())
     {
         event->visit(EngineVisitor(*this));
@@ -88,4 +93,19 @@ void Engine::EventGamepadConnected(int id)
 void Engine::EventGamepadDisconnected(int id)
 {
     LOG_INFO("Gamepad {} disconnected", id);
+}
+
+void Engine::EventSceneChange(const std::string& name)
+{
+    // TODO: Implement scene switching logic
+}
+
+void Engine::EventSceneRestart()
+{
+    context_.scenes.RestartCurrentScene();
+}
+
+void Engine::EventSceneMenuReturn()
+{
+    context_.scenes.ChangeScene("Menu");
 }
