@@ -12,6 +12,7 @@
 #include "Managers/RenderManager.h"
 #include "Managers/ScreenshotManager.h"
 #include "Managers/CursorManager.h"
+#include "Managers/GuiManager.h"
 
 struct EngineContext
 {
@@ -25,7 +26,8 @@ struct EngineContext
     RenderManager renderer;
     ScreenshotManager screenshot;
     CursorManager cursor;
+    GuiManager gui;
 
     EngineContext(sf::RenderWindow& window) :
-        screenshot(window), cursor(window) {}
+        screenshot(window), cursor(window), gui(window) {}
 };
