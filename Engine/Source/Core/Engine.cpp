@@ -6,7 +6,10 @@ Engine::Engine() :
     window_(sf::VideoMode(sf::Vector2u(gConfig.windowSize)), gConfig.windowTitle),
     context_(window_),
     scenes_(SceneFactory::CreateScenes(context_)),
-    currentScene_(nullptr)
+    // currentScene_(nullptr),
+    overlay_(context_.gui),
+    cursorWasVisible_(true)
+
 {
     window_.setIcon(sf::Image("Content/Textures/Icon.png"));
     window_.setMinimumSize(window_.getSize() / 2u);
@@ -40,7 +43,15 @@ void Engine::ProcessEvents()
         event->visit(EngineVisitor(*this));
         context_.gui.ProcessEvent(*event);
 
-        currentScene_->OnEvent(*event);
+        if (!overlay_.IsVisible())
+        {
+            // currentScene_->OnEvent(*event);
+        }
+    }
+
+    if (const auto selection = overlay_.FetchSelection())
+    {
+        EventOverlaySelect(*selection);
     }
 }
 
@@ -49,7 +60,10 @@ void Engine::Update()
     context_.time.Update();
     context_.cursor.Update(context_.time.GetDeltaTime());
 
-    currentScene_->Update();
+    if (!overlay_.IsVisible())
+        {
+            // currentScene_->Update();
+        }
 }
 
 void Engine::Render()
@@ -57,7 +71,7 @@ void Engine::Render()
     window_.clear();
 
     context_.renderer.BeginDrawing();
-    currentScene_->Render();
+    // currentScene_->Render();
     window_.draw(sf::Sprite(context_.renderer.FinishDrawing()));
 
     context_.gui.Render();
@@ -79,13 +93,13 @@ void Engine::EventWindowResized(sf::Vector2u size)
 
 void Engine::EventWindowFocusLost()
 {
-    currentScene_->OnPause(true);
+    // currentScene_->OnPause(true);
     LOG_INFO("Window focus lost");
 }
 
 void Engine::EventWindowFocusGained()
 {
-    currentScene_->OnPause(false);
+    // currentScene_->OnPause(overlay_.IsVisible());
     LOG_INFO("Window focus gained");
 }
 
@@ -116,16 +130,43 @@ void Engine::EventSceneChange(const std::string& name)
 
     context_.input.Clear();
 
-    currentScene_ = nextScene;    
-    currentScene_->Start();
+    // currentScene_ = nextScene;    
+    // currentScene_->Start();
 }
 
 void Engine::EventSceneRestart()
 {
+    overlay_.SetVisible(false);
     context_.scenes.RestartCurrentScene();
 }
 
 void Engine::EventSceneMenuReturn()
 {
+    overlay_.SetVisible(false);
     context_.scenes.ChangeScene("Menu");
+}
+
+void Engine::EventOverlayPauseToggle()
+{
+    const bool overlayVisible = !overlay_.IsVisible();
+    overlay_.SetVisible(overlayVisible);
+
+    const bool cursorVisible = context_.cursor.IsVisible();
+    context_.cursor.SetVisible(overlayVisible or cursorWasVisible_);
+    cursorWasVisible_ = cursorVisible;
+
+    // currentScene_->OnPause(overlayVisible);
+    LOG_INFO(overlayVisible ? "Game paused" : "Game resumed");
+}
+
+void Engine::EventOverlaySelect(OverlaySelection selection)
+{
+    switch (selection)
+    {
+        case OverlaySelection::Resume:      EventOverlayPauseToggle();  break;
+        case OverlaySelection::Restart:     EventSceneRestart();        break;
+        case OverlaySelection::Menu:        EventSceneMenuReturn();     break;
+        case OverlaySelection::Quit:        EventWindowClose();         break;
+        default: break;
+    }
 }

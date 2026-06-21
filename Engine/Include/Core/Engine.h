@@ -5,6 +5,7 @@
 #include "Core/EngineVisitor.h"
 #include "Core/EngineContext.h"
 #include "Scene/SceneFactory.h"
+#include "Core/Overlay.h"
 
 class Engine
 {
@@ -14,6 +15,9 @@ class Engine
         
         SceneFactory::Scenes scenes_;
         Scene* currentScene_;
+
+        Overlay overlay_;
+        bool cursorWasVisible_;
     
     public:
         Engine();
@@ -37,4 +41,6 @@ class Engine
         void EventSceneChange(const std::string& name);
         void EventSceneRestart();
         void EventSceneMenuReturn();
+        void EventOverlayPauseToggle();
+        void EventOverlaySelect(OverlaySelection selection);
 };
