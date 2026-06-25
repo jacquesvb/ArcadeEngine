@@ -6,7 +6,7 @@ Engine::Engine() :
     window_(sf::VideoMode(sf::Vector2u(gConfig.windowSize)), gConfig.windowTitle),
     context_(window_),
     scenes_(SceneFactory::CreateScenes(context_)),
-    // currentScene_(nullptr),
+    currentScene_(nullptr),
     overlay_(context_.gui),
     cursorWasVisible_(true)
 
@@ -22,6 +22,7 @@ Engine::Engine() :
     }
 
     context_.audio.SetGlobalVolume(gConfig.globalVolume);
+    context_.scenes.ChangeScene("Bounce");
 
     LOG_INFO("Window created");
 }
@@ -45,7 +46,7 @@ void Engine::ProcessEvents()
 
         if (!overlay_.IsVisible())
         {
-            // currentScene_->OnEvent(*event);
+            currentScene_->OnEvent(*event);
         }
     }
 
@@ -62,7 +63,7 @@ void Engine::Update()
 
     if (!overlay_.IsVisible())
         {
-            // currentScene_->Update();
+            currentScene_->Update();
         }
 }
 
@@ -71,7 +72,7 @@ void Engine::Render()
     window_.clear();
 
     context_.renderer.BeginDrawing();
-    // currentScene_->Render();
+    currentScene_->Render();
     window_.draw(sf::Sprite(context_.renderer.FinishDrawing()));
 
     context_.gui.Render();
@@ -93,13 +94,13 @@ void Engine::EventWindowResized(sf::Vector2u size)
 
 void Engine::EventWindowFocusLost()
 {
-    // currentScene_->OnPause(true);
+    currentScene_->OnPause(true);
     LOG_INFO("Window focus lost");
 }
 
 void Engine::EventWindowFocusGained()
 {
-    // currentScene_->OnPause(overlay_.IsVisible());
+    currentScene_->OnPause(overlay_.IsVisible());
     LOG_INFO("Window focus gained");
 }
 
@@ -130,8 +131,8 @@ void Engine::EventSceneChange(const std::string& name)
 
     context_.input.Clear();
 
-    // currentScene_ = nextScene;    
-    // currentScene_->Start();
+    currentScene_ = nextScene;    
+    currentScene_->Start();
 }
 
 void Engine::EventSceneRestart()
@@ -155,7 +156,7 @@ void Engine::EventOverlayPauseToggle()
     context_.cursor.SetVisible(overlayVisible or cursorWasVisible_);
     cursorWasVisible_ = cursorVisible;
 
-    // currentScene_->OnPause(overlayVisible);
+    currentScene_->OnPause(overlayVisible);
     LOG_INFO(overlayVisible ? "Game paused" : "Game resumed");
 }
 
