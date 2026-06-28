@@ -23,6 +23,7 @@ class Engine
         Engine();
 
         bool IsRunning() const;
+        bool HasFocus() const;
 
         void ProcessEvents();
         void Update();
